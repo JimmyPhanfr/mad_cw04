@@ -89,11 +89,11 @@ class DatabaseHelper {
 
   // String _getStatus(int status) {
   //   switch (status) {
-  //     case 1:
+  //     case 0:
   //       return 'Unbegun';
-  //     case 2:
+  //     case 1:
   //       return 'Pending';
-  //     case 3:
+  //     case 2:
   //       return 'Completed';
   //     default:
   //       return status.toString();

@@ -37,6 +37,7 @@ dependencies:
   sqflite: ^2.3.0 # Check for the latest version
   path_provider: ^2.1.1 # Check for the latest version
   path: ^1.8.2
+  list_picker: ^1.2.0
 
 dev_dependencies:
   flutter_test:

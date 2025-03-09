@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'database_helper.dart';
 import 'dart:async';
+import 'package:list_picker/list_picker.dart';
 
 final _databaseHelper = DatabaseHelper();
 Future<void> main() async {
@@ -37,24 +38,27 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final _textControllerPlanName = TextEditingController();
   final _textControllerPlanDetails = TextEditingController();
-  // final _textControllerPlanDate = TextEditingController();
 
   DateTime selectedDate = DateTime.now();
 
+  final _completionStatusController = TextEditingController();
+
   Future openPlanDialog() => showDialog(
+    barrierDismissible: false,
     context: context, 
     builder: (context) => AlertDialog(
       title: Text('Create New Plan'),
       content: StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: _textControllerPlanName,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'Name',
-                  hintText: 'Name new plan',
+                  labelText: 'Name*',
+                  hintText: 'Name new plan (required)',
                   suffixIcon: IconButton(
                     onPressed: () {
                       _textControllerPlanName.clear();
@@ -63,6 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
               ),
+              SizedBox(height: 10.0),
               TextField(
                 controller: _textControllerPlanDetails,
                 decoration: InputDecoration(
@@ -77,11 +82,24 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ),
               ),
+              SizedBox(height: 3.0),
+              ListPickerField(
+                label: "Completion Status*",
+                items: const ["Unbegun", "Ongoing", "Completed"],
+                controller: _completionStatusController,
+              ),
               SizedBox(
+                height: 40.0,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    Text("${selectedDate.toLocal()}".split(' ')[0]),
+                    Text(
+                      "Date:", style: TextStyle(fontSize: 16),
+                    ),
+                    Text(
+                      "${selectedDate.toLocal()}".split(' ')[0],
+                      style: TextStyle(fontSize: 16),
+                    ),
                     IconButton(
                       onPressed: () {
                         _selectDate(context, setState);
@@ -91,12 +109,45 @@ class _MyHomePageState extends State<MyHomePage> {
                   ],
                 )
               ),
-                  // ElevatedButton(
-                  //   onPressed: () {
-                  //     _selectDate(context, setState);
-                  //   },
-                  //   child: const Text('Select date'),
-                  // ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.blueAccent,
+                    ),
+                    onPressed: () {
+                      if (_textControllerPlanName.text.isNotEmpty  && _completionStatusController.text.isNotEmpty) {
+                        _insert(setState);
+                        _textControllerPlanName.clear();
+                        _textControllerPlanDetails.clear();
+                        selectedDate = DateTime.now();
+                        _completionStatusController.clear();
+                        Navigator.of(context).pop();
+                      }
+                      else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Please include a name and completion status.'),
+                          ),
+                        );
+                      }
+                    },
+                    child: const Text('Confirm'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      _textControllerPlanName.clear();
+                      _textControllerPlanDetails.clear();
+                      selectedDate = DateTime.now();
+                      _completionStatusController.clear();
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Discard'),
+                  ),
+                ],
+              ),
             ],
           );
         },
@@ -138,4 +189,17 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
+  void _insert(setState) async {
+    // row to insert
+    Map<String, dynamic> row = {
+      DatabaseHelper.columnName: _textControllerPlanName,
+      DatabaseHelper.columnStatus: _completionStatusController,
+      DatabaseHelper.columnDetails: _textControllerPlanDetails,
+      DatabaseHelper.columnDate: selectedDate,
+    };
+    final id = await _databaseHelper.insert(row);
+    debugPrint('inserted row id: $id');
+  }
+
 }
