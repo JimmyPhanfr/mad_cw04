@@ -11,11 +11,13 @@ class DatabaseHelper {
   static const columnName = 'name';
   static const columnStatus = 'status';
   static const columnDetails = 'details';
+  static const columnDate = 'date';
+  static const columnList = 'list';
 
   late Database _db;
 
   // this opens the database (and creates it if it doesn't exist)
-  Future<void> init() async {
+  Future<void> init() async { 
     final documentsDirectory = await getApplicationDocumentsDirectory();
     final path = join(documentsDirectory.path, _databaseName);
     _db = await openDatabase(
@@ -32,6 +34,8 @@ class DatabaseHelper {
       $columnName TEXT NOT NULL,
       $columnStatus TEXT NOT NULL,
       $columnDetails TEXT,
+      $columnDate TEXT,
+      $columnList TEXT
     )''');
   }
 
@@ -82,4 +86,17 @@ class DatabaseHelper {
   Future<int> deleteAllRecords() async {
     return await _db.delete(table);
   }
+
+  // String _getStatus(int status) {
+  //   switch (status) {
+  //     case 1:
+  //       return 'Unbegun';
+  //     case 2:
+  //       return 'Pending';
+  //     case 3:
+  //       return 'Completed';
+  //     default:
+  //       return status.toString();
+  //   }
+  // }
 }
