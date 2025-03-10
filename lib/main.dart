@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'database_helper.dart';
 import 'dart:async';
 import 'package:list_picker/list_picker.dart';
+import 'task.dart';
 
-final _databaseHelper = DatabaseHelper();
+// final _databaseHelper = DatabaseHelper();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await _databaseHelper.init();
+  // await _databaseHelper.init();
   runApp(MyApp());
 }
 
@@ -31,6 +32,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final DatabaseHelper _dbhelper = DatabaseHelper.instance;
+
   @override
   void initState() {
     super.initState();
@@ -118,13 +121,19 @@ class _MyHomePageState extends State<MyHomePage> {
                       backgroundColor: Colors.blueAccent,
                     ),
                     onPressed: () {
-                      if (_textControllerPlanName.text.isNotEmpty  && _completionStatusController.text.isNotEmpty) {
-                        _insert(setState);
+                      if (_textControllerPlanName.text.isNotEmpty && _completionStatusController.text.isNotEmpty) {
+                        _dbhelper.addTask(
+                          _textControllerPlanName.text, 
+                          _completionStatusController.text, 
+                          _textControllerPlanDetails.text,
+                          selectedDate.toString(),
+                        );
                         _textControllerPlanName.clear();
                         _textControllerPlanDetails.clear();
                         selectedDate = DateTime.now();
                         _completionStatusController.clear();
-                        Navigator.of(context).pop();
+                        Navigator.pop(context);
+                        setState((){});
                       }
                       else {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -183,23 +192,50 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 openPlanDialog();
               }, 
-              child: Text('Add New Plan'))
+              child: Text('Add New Plan')
+            ),
+            _tasksList(),
           ],
         ),
       ),
     );
   }
 
-  void _insert(setState) async {
-    // row to insert
-    Map<String, dynamic> row = {
-      DatabaseHelper.columnName: _textControllerPlanName,
-      DatabaseHelper.columnStatus: _completionStatusController,
-      DatabaseHelper.columnDetails: _textControllerPlanDetails,
-      DatabaseHelper.columnDate: selectedDate,
-    };
-    final id = await _databaseHelper.insert(row);
-    debugPrint('inserted row id: $id');
+  Widget _tasksList() {
+    return FutureBuilder(
+      future: _dbhelper.getTasks(), 
+      builder: (context, snapshot) {
+        return ListView.builder(
+          shrinkWrap: true,
+          itemCount: snapshot.data?.length ?? 0,
+          itemBuilder: (context, index) {
+            Task task = snapshot.data![index];
+            return ListTile(
+              title: Text(task.name,),
+            );
+          },
+        );
+      },
+    );
   }
 
+  // void _insert(setState) async {
+  //   // row to insert
+  //   Map<String, dynamic> row = {
+  //     DatabaseHelper.columnName: _textControllerPlanName,
+  //     DatabaseHelper.columnStatus: _completionStatusController,
+  //     DatabaseHelper.columnDetails: _textControllerPlanDetails,
+  //     DatabaseHelper.columnDate: selectedDate,
+  //   };
+  //   final id = await _databaseHelper.insert(row);
+  //   debugPrint('inserted row id: $id');
+  // }
+
+  // void _query() async {
+  //   final allRows = await _databaseHelper.queryAllRows();
+  //   debugPrint('query all rows:');
+  //   for (final row in allRows) {
+  //     debugPrint(row.toString());
+  //   }
+  // }
 }
