@@ -4,10 +4,8 @@ import 'dart:async';
 import 'package:list_picker/list_picker.dart';
 import 'task.dart';
 
-// final _databaseHelper = DatabaseHelper();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await _databaseHelper.init();
   runApp(MyApp());
 }
 
@@ -218,24 +216,4 @@ class _MyHomePageState extends State<MyHomePage> {
       },
     );
   }
-
-  // void _insert(setState) async {
-  //   // row to insert
-  //   Map<String, dynamic> row = {
-  //     DatabaseHelper.columnName: _textControllerPlanName,
-  //     DatabaseHelper.columnStatus: _completionStatusController,
-  //     DatabaseHelper.columnDetails: _textControllerPlanDetails,
-  //     DatabaseHelper.columnDate: selectedDate,
-  //   };
-  //   final id = await _databaseHelper.insert(row);
-  //   debugPrint('inserted row id: $id');
-  // }
-
-  // void _query() async {
-  //   final allRows = await _databaseHelper.queryAllRows();
-  //   debugPrint('query all rows:');
-  //   for (final row in allRows) {
-  //     debugPrint(row.toString());
-  //   }
-  // }
 }
