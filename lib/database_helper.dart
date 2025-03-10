@@ -88,4 +88,21 @@ class DatabaseHelper {
       ],
     );
   }
+
+  void updateTask(int id, String name, int status, String details, String date) async {
+    final db = await database;
+    await db.update(
+      table, 
+      {
+        columnName: name,
+        columnStatus: status,
+        columnDetails: details,
+        columnDate: date,
+      },
+      where: 'id = ?',
+      whereArgs: [
+        id,
+      ],
+    );
+  }
 }

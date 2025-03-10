@@ -167,6 +167,128 @@ class _MyHomePageState extends State<MyHomePage> {
     ),
   );
 
+  Future openEditDialog(int id, String name, String status, String details, String date) => showDialog(
+    barrierDismissible: false,
+    context: context, 
+    builder: (context) => AlertDialog(
+      title: Text('Edit Plan'),
+      content: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _textControllerPlanName,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Name*',
+                  hintText: 'Name new plan (required)',
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      _textControllerPlanName.clear();
+                    },
+                    icon: const Icon(Icons.clear),
+                  ),
+                ),
+              ),
+              SizedBox(height: 10.0),
+              TextField(
+                controller: _textControllerPlanDetails,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Details',
+                  hintText: 'Give plan details',
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      _textControllerPlanDetails.clear();
+                    },
+                    icon: const Icon(Icons.clear),
+                  ),
+                ),
+              ),
+              SizedBox(height: 3.0),
+              ListPickerField(
+                label: "Completion Status*",
+                items: const ["Unbegun", "Completed"],
+                controller: _completionStatusController,
+              ),
+              SizedBox(
+                height: 40.0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text(
+                      "Date:", style: TextStyle(fontSize: 16),
+                    ),
+                    Text(
+                      "${selectedDate.toLocal()}".split(' ')[0],
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        _selectDate(context, setState);
+                      },
+                    icon: const Icon(Icons.calendar_month),
+                  ),
+                  ],
+                )
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.blueAccent,
+                    ),
+                    onPressed: () {
+                      if (_completionStatusController.text == "Completed") {
+                        _status = 1;
+                      } else {_status = 0;}
+                      if (_textControllerPlanName.text.isNotEmpty && _completionStatusController.text.isNotEmpty) {
+                        _dbhelper.updateTask(
+                          id,
+                          _textControllerPlanName.text,
+                          _status,
+                          _textControllerPlanDetails.text,
+                          DateUtils.dateOnly(selectedDate).toString(),
+                        );
+                        _textControllerPlanName.clear();
+                        _textControllerPlanDetails.clear();
+                        selectedDate = DateTime.now();
+                        _completionStatusController.clear();
+                        Navigator.pop(context);
+                        setState((){});
+                      }
+                      else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Please include a name and completion status.'),
+                          ),
+                        );
+                      }
+                    },
+                    child: const Text('Confirm'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      _textControllerPlanName.clear();
+                      _textControllerPlanDetails.clear();
+                      selectedDate = DateTime.now();
+                      _completionStatusController.clear();
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Discard'),
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+      ),
+    ),
+  );
+
   Future<void> _selectDate(BuildContext context, setState) async {
     final DateTime? picked = await showDatePicker(
         context: context,
@@ -214,7 +336,9 @@ class _MyHomePageState extends State<MyHomePage> {
           itemBuilder: (context, index) {
             Task task = snapshot.data![index];
             return ListTile(
-              onLongPress: ,
+              onLongPress: () async {
+                openEditDialog(task.id, task.name, task.getStatus(), task.details, task.date);
+              },
               title: Text(task.name,),
               subtitle: Column(
                 children: [
