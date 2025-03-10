@@ -1,6 +1,6 @@
 class Task {
-  String name, details, status, date, list;
-  int id;
+  String name, details, date, list;
+  int id, status;
 
   Task({
     required this.id,
@@ -10,4 +10,19 @@ class Task {
     this.date = "",
     this.list = "",
   });
+
+  String getStatus() {
+    switch (status) {
+      case 0:
+        return "Unbegun";
+      case 1:
+        return "Completed";
+      default:
+        return "Unbegun";
+    } 
+  }
+
+  String getDate() {
+    return date.substring(0,10);
+  }
 }

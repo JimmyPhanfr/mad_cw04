@@ -39,7 +39,7 @@ class DatabaseHelper {
     CREATE TABLE $table (
       $columnId INTEGER PRIMARY KEY,
       $columnName TEXT NOT NULL,
-      $columnStatus TEXT NOT NULL,
+      $columnStatus INT NOT NULL,
       $columnDetails TEXT,
       $columnDate TEXT,
       $columnList TEXT
@@ -47,7 +47,7 @@ class DatabaseHelper {
   }
 
   // Helper methods
-  void addTask(String name, String status, String details, String date) async {
+  void addTask(String name, int status, String details, String date) async {
     final db = await database;
     await db.insert(
       table, 
@@ -67,11 +67,25 @@ class DatabaseHelper {
     List<Task> tasks = data.map((e) => Task(
       id: e["id"] as int, 
       name: e["name"] as String, 
-      status: e["status"] as String,
+      status: e["status"] as int,
       details: e["details"] as String,
       date: e["date"] as String,
       list: e["list"] as String,
     ),).toList();
     return tasks;
+  }
+
+  void updateTaskStatus(int id, int status) async {
+    final db = await database;
+    await db.update(
+      table, 
+      {
+        columnStatus: status,
+      },
+      where: 'id = ?',
+      whereArgs: [
+        id,
+      ],
+    );
   }
 }

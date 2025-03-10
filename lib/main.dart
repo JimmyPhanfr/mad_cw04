@@ -37,6 +37,8 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
+  int _status = 0;
+
   final _textControllerPlanName = TextEditingController();
   final _textControllerPlanDetails = TextEditingController();
 
@@ -86,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
               SizedBox(height: 3.0),
               ListPickerField(
                 label: "Completion Status*",
-                items: const ["Unbegun", "Ongoing", "Completed"],
+                items: const ["Unbegun", "Completed"],
                 controller: _completionStatusController,
               ),
               SizedBox(
@@ -119,12 +121,15 @@ class _MyHomePageState extends State<MyHomePage> {
                       backgroundColor: Colors.blueAccent,
                     ),
                     onPressed: () {
+                      if (_completionStatusController.text == "Completed") {
+                        _status = 1;
+                      } else {_status = 0;}
                       if (_textControllerPlanName.text.isNotEmpty && _completionStatusController.text.isNotEmpty) {
                         _dbhelper.addTask(
-                          _textControllerPlanName.text, 
-                          _completionStatusController.text, 
+                          _textControllerPlanName.text,
+                          _status,
                           _textControllerPlanDetails.text,
-                          selectedDate.toString(),
+                          DateUtils.dateOnly(selectedDate).toString(),
                         );
                         _textControllerPlanName.clear();
                         _textControllerPlanDetails.clear();
@@ -209,7 +214,22 @@ class _MyHomePageState extends State<MyHomePage> {
           itemBuilder: (context, index) {
             Task task = snapshot.data![index];
             return ListTile(
+              onLongPress: ,
               title: Text(task.name,),
+              subtitle: Column(
+                children: [
+                  Text(task.getDate()),
+                  Text(task.details),
+                  Text(task.getStatus()),
+                ],
+              ),
+              trailing: Checkbox(
+                value: task.status == 1, 
+                onChanged: (value) {
+                  _dbhelper.updateTaskStatus(task.id, value == true ? 1 : 0);
+                  setState(() {});
+                },
+              ),
             );
           },
         );
